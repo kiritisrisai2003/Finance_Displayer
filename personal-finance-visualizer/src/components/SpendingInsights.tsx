@@ -23,7 +23,7 @@ export default function SpendingInsights({
     const budget = budgetObj ? budgetObj.amount : 0;
     const diff = budget - actual;
 
-    return { category, actual, budget, diff };
+    return { category, actual, budget, diff }; // Returning all the data to be used later
   });
 
   return (
@@ -43,7 +43,8 @@ export default function SpendingInsights({
               ) : (
                 <span className="text-[#5A8C5E]">
                   ✅ You are under budget in <strong>{category}</strong> by 
-                  <span className="font-bold"> ${diff.toFixed(2)}</span>.
+                  <span className="font-bold"> ${diff.toFixed(2)}</span> (Actual: 
+                  <span className="font-bold"> ${actual.toFixed(2)}</span>).
                 </span>
               )
             ) : (

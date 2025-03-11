@@ -3,12 +3,14 @@ import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+// Define the type for the PUT and DELETE handlers
+export async function PUT(request: Request) {
   try {
-    if (!ObjectId.isValid(params.id)) {
+    // Access the dynamic route parameter (id) from request.url
+    const url = new URL(request.url);
+    const id = url.pathname.split("/")[3]; // This assumes the URL pattern is /api/transactions/[id]
+
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid transaction ID" },
         { status: 400 }
@@ -37,12 +39,12 @@ export async function PUT(
     const collection = db.collection("transactions");
 
     const result = await collection.findOneAndUpdate(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { $set: updatedTransaction },
       { returnDocument: "after" } // Return the updated document
     );
 
-    if (!result) {
+    if (!result?.value) {
       return NextResponse.json(
         { error: "Transaction not found" },
         { status: 404 }
@@ -51,7 +53,7 @@ export async function PUT(
 
     return NextResponse.json({
       message: "Transaction updated",
-      transaction: result,
+      transaction: result.value,
     });
   } catch (error) {
     return NextResponse.json(
@@ -61,12 +63,13 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
-    if (!ObjectId.isValid(params.id)) {
+    // Access the dynamic route parameter (id) from request.url
+    const url = new URL(request.url);
+    const id = url.pathname.split("/")[3]; // This assumes the URL pattern is /api/transactions/[id]
+
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid transaction ID" },
         { status: 400 }
@@ -77,7 +80,7 @@ export async function DELETE(
     const db = client.db();
     const collection = db.collection("transactions");
 
-    const result = await collection.deleteOne({ _id: new ObjectId(params.id) });
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
